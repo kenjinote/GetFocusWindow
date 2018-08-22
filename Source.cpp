@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include <psapi.h>
+#include <direct.h>
 
 TCHAR szClassName[] = TEXT("Window");
 
@@ -44,6 +45,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_TIMER:
 		KillTimer(hWnd, 0x1234);
 		{
+			SendMessage(hEdit, WM_SETREDRAW, 0, 0);
 			SetWindowText(hEdit, 0);
 			GUITHREADINFO guiInfo = { sizeof(GUITHREADINFO) };
 			if (GetGUIThreadInfo(0, &guiInfo))
@@ -103,30 +105,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				{
 					TCHAR szText[1024];
-					wsprintf(szText, TEXT("キーボードフォーカスを持つウィンドウのハンドル: 0x%x\r\n"), guiInfo.hwndCapture);
-					SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)szText);				
-				}
-				{
-					TCHAR szText[1024];
-					wsprintf(szText, TEXT("アクティブなメニューを所有するウィンドウのハンドル: 0x%x\r\n"), guiInfo.hwndMenuOwner);
+					wsprintf(szText, TEXT("スレッド内のアクティブウィンドウハンドル: 0x%x\r\n"), guiInfo.hwndActive);
 					SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)szText);
-				}
-				{
-					TCHAR szText[1024];
-					wsprintf(szText, TEXT("移動またはサイズループでのウィンドウへのハンドル: 0x%x\r\n"), guiInfo.hwndMoveSize);
+					wsprintf(szText, TEXT("キーボードフォーカスを持つウィンドウハンドル: 0x%x\r\n"), guiInfo.hwndCapture);
 					SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)szText);
-				}
-				{
-					TCHAR szText[1024];
-					wsprintf(szText, TEXT("キャレットを表示しているウィンドウのハンドル: 0x%x\r\n"), guiInfo.hwndCaret);
+					wsprintf(szText, TEXT("アクティブなメニューを所有するウィンドウハンドル: 0x%x\r\n"), guiInfo.hwndMenuOwner);
 					SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)szText);
-				}
-				{
-					TCHAR szText[1024];
-					wsprintf(szText, TEXT("hwndCaretメンバーによって指定されたウィンドウを基準にした、クライアント座標でのキャレットの境界矩形: %d, %d, %d, %d\r\n"), guiInfo.rcCaret.left, guiInfo.rcCaret.top, guiInfo.rcCaret.right, guiInfo.rcCaret.bottom);
+					wsprintf(szText, TEXT("移動またはサイズループでのウィンドウハンドル: 0x%x\r\n"), guiInfo.hwndMoveSize);
+					SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)szText);
+					wsprintf(szText, TEXT("キャレットを表示しているウィンドウハンドル: 0x%x\r\n"), guiInfo.hwndCaret);
+					SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)szText);
+					wsprintf(szText, TEXT("hwndCaretウィンドウを基準にしたキャレットの矩形(クライアント座標): %d, %d, %d, %d\r\n"), guiInfo.rcCaret.left, guiInfo.rcCaret.top, guiInfo.rcCaret.right, guiInfo.rcCaret.bottom);
 					SendMessage(hEdit, EM_REPLACESEL, 0, (LPARAM)szText);
 				}
 			}
+			SendMessage(hEdit, WM_SETREDRAW, 1, 0);
 		}
 		SetTimer(hWnd, 0x1234, 1000, 0);
 		break;
